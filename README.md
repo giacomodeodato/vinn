@@ -31,11 +31,15 @@ class Net(vinn.Module): # class Net(nn.Module):
       return x
 ```
 
+## Prior and Posterior distributions
+Prior and posterior distribution can be set as arguments in the layer declaration. The module supports distributions from `torch.distributions` that have a loc and scale parameters. The default implementation uses a Normal posterior distribution as well as a Normal prior initialized with `loc=0` and `scale=1`.
+
 ## Training
 Bayesian neural networks implemented using variational inference can be trained by optimizing the Evidence Lower BOund (ELBO):
 <p align="center">
 <img src="https://render.githubusercontent.com/render/math?math=ELBO%20%3D%20%5Cmathbb%7BE%7D_%7Bq(%5Cmathbf%7Bw%7D%3B%20%5Ctheta)%7D%5C%7B%5Cmbox%7Blog%20%7Dp(%5Cmathcal%7BD%7D%7C%5Cmathbf%7Bw%7D)%5C%7D%20-%20KL%5C%7Bq(%5Cmathbf%7Bw%7D%3B%20%5Ctheta)%7C%7Cp(%5Cmathbf%7Bw%7D)%5C%7D" width=500>
 </p>
+This is equivalent to minimizing the negative log likelihood (cross entropy loss) plus the KL divergence between the posterior approximation and the prior distribution.
 
 ## Uncertainty estimation
 
