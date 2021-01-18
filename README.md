@@ -39,12 +39,20 @@ Bayesian neural networks implemented using variational inference can be trained 
 <p align="center">
 <img src="https://render.githubusercontent.com/render/math?math=ELBO%20%3D%20%5Cmathbb%7BE%7D_%7Bq(%5Cmathbf%7Bw%7D%3B%20%5Ctheta)%7D%5C%7B%5Cmbox%7Blog%20%7Dp(%5Cmathcal%7BD%7D%7C%5Cmathbf%7Bw%7D)%5C%7D%20-%20KL%5C%7Bq(%5Cmathbf%7Bw%7D%3B%20%5Ctheta)%7C%7Cp(%5Cmathbf%7Bw%7D)%5C%7D" width=500>
 </p>
-This is equivalent to minimizing the negative log likelihood (cross entropy loss) plus the KL divergence between the posterior approximation and the prior distribution.
+
+This is equivalent to minimizing the negative log likelihood (cross entropy loss) plus the KL divergence between the posterior approximation and the prior distribution. Such loss can be scaled to very large datasets using stochastic variational inference \[Hoffman et al., 2013\] as follows:
+<p align="center">
+<img src="https://render.githubusercontent.com/render/math?math=ELBO%20loss%20%3D%20-%20%5Cmathbb%7BE%7D_%7Bq(%5Cmathbf%7Bw%7D%3B%20%5Ctheta)%7D%5C%7B%5Ctext%7Blog%20%7Dp(%5Cmathcal%7BD%7D_i%7C%5Cmathbf%7Bw%7D)%5C%7D%20%2B%20%5Cbeta%20KL%5C%7Bq(%5Cmathbf%7Bw%7D%3B%20%5Ctheta)%7C%7Cp(%5Cmathbf%7Bw%7D)%5C%7D" width=500>
+</p>
+
+where *i* is the mini-batch index, <img src="https://render.githubusercontent.com/render/math?math=%5Cbeta%20%3D%201%2FM"> and *M* is the number of mini-batches.
 
 ## Uncertainty estimation
 
 ## References
 
-**\[Blundell et al., 2015\]** "Weight Uncertainty in Neural Network." International Conference on Machine Learning.
+**\[Blundell et al., 2015\]** "Weight Uncertainty in Neural Network". International Conference on Machine Learning.
 
-**\[Kingma, Salimans and Welling, 2015\]** “Variational dropout and the local reparameterization trick”. Advances in Neural Information Processing Systems.
+**\[Hoffman et al., 2013\]** "Stochastic variational inference". The Journal of Machine Learning Research.
+
+**\[Kingma, Salimans and Welling, 2015\]** "Variational dropout and the local reparameterization trick". Advances in Neural Information Processing Systems.
