@@ -41,6 +41,7 @@ class Net(vinn.Module): # class Net(nn.Module):
         x = self.fc3(x)
         return x
 ```
+By default, `vinn` layers have a `kl` attribute returning the sum of the KL divergence between the layer prior and posterior approximation for each weight (and bias). Models extending `vinn.Module` have a `kl` attribute as well, it returns the sum of the KL divergence of each submodule in the model.
 
 ### Training
 Bayesian neural networks implemented using variational inference can be trained by optimizing the Evidence Lower BOund (ELBO):
@@ -78,15 +79,40 @@ for epoch in range(n_epochs):
         optimizer.step()
 ```
 
-By default, `vinn` layers have a `kl` attribute as well as models extending `vinn.Module`.
 > :warning: The negative log likelihood function (i.e. `CrossEntropyLoss`) must have `reduction="sum"` in order to follow the correct ELBO loss implementation. Otherwise, `beta` needs to be scaled accordingly.
 
 ### Uncertainty estimation
+Since the parameters of the Bayesian model are sampled at each forward pass, every output corresponds to a sample from the predictive distribution. In order to estimate the predictive uncertainty it is possible to simply estimate the variance of the predictive distribution using such samples or, following \[Kendall and Gal, 2017\], compute both the aleatoric and epistemic components of uncertainty as follows:
+<p align="center">
+<img src="https://render.githubusercontent.com/render/math?math=u%20%3D%20%5Cfrac%7B1%7D%7BT%7D%5Csum_%7Bt%3D1%7D%5ET%20%5Chat%7Bp%7D_%7Bt%2Ci%7D%20-%20%5Chat%7Bp%7D_%7Bt%2Ci%7D%5E2%20%2B%20%5Cfrac%7B1%7D%7BT%7D%5Csum_%7Bt%3D1%7D%5ET(%5Chat%7Bp%7D_%7Bt%2Ci%7D%20-%20%5Cbar%7Bp%7D_i)%5E2%2C%5Cqquad%5Cbar%7Bp%7D%20%3D%20%5Cdfrac%7B1%7D%7BT%7D%5Csum_%7Bt%3D1%7D%5ET%5Chat%7Bp%7D_t%2C%5Cqquad%5Chat%7Bp%7D_t%3A%5C%20network%5C%20output" width=700>
+</p>
+
+Where *T* is the number of predictive samples, *t* is the sample index and *i* is the class index. Such uncertainty measure can finally be transformed into a more intuitive confidence score by computing `c = 1 - 2*sqrt(u)` as proposed in \[Deodato et al., 2020\].
+```python
+def confidence_score(p):
+    # compute sample mean
+    p_mean = np.mean(p, axis=0)
+    
+    # compute uncertainty estimate
+    aleatoric = np.mean(p - np.square(p), axis=0)
+    epistemic = np.mean(np.square(p - np.tile(p_mean, (len(p), 1))), axis=0)
+    u = aleatoric + epistemic
+    
+    # select uncertainty corresponding to the predicted class
+    u = u[np.argmax(p_mean)]
+    
+    # return confidence score
+    return 1 - 2 * np.sqrt(u)
+```
 
 ## References
 
-**\[Blundell et al., 2015\]** "Weight Uncertainty in Neural Network". International Conference on Machine Learning.
+**\[Blundell et al., 2015\]** "Weight Uncertainty in Neural Network". *International Conference on Machine Learning*.
 
-**\[Hoffman et al., 2013\]** "Stochastic variational inference". The Journal of Machine Learning Research.
+**\[Deodato et al., 2020\]** "Bayesian Neural Networks for Cellular Image Classification and Uncertainty Analysis". *bioRxiv*.
 
-**\[Kingma, Salimans and Welling, 2015\]** "Variational dropout and the local reparameterization trick". Advances in Neural Information Processing Systems.
+**\[Hoffman et al., 2013\]** "Stochastic variational inference". *The Journal of Machine Learning Research*.
+
+**\[Kendall and Gal, 2017\]** "What uncertainties do we need in bayesian deep learning for computer vision?". *Advances in neural information processing systems*.
+
+**\[Kingma, Salimans and Welling, 2015\]** "Variational dropout and the local reparameterization trick". *Advances in Neural Information Processing Systems*.
