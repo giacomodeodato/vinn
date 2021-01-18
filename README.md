@@ -4,45 +4,22 @@ A pytorch module to implement Bayesian neural networks with variational inferenc
 The standard layer implementation uses <i>Bayes by Backprop</i> \[Blundell et al., 2015\] and the local reparameterization trick \[Kingma, Salimans and Welling, 2015\] to accelerate the forward pass. The KL divergence is computed in closed form if possible, and using the Monte Carlo approximation otherwise.
 
 ## Model definition
-This module is ment to be used as a drop-in replacement of ```torch.nn```. Below is an example of a standard neural network architecture and the correspondig Bayesian implementation using ```vinn```.
-```python
-import torch.nn as nn
-import torch.nn.functional as F
-
-class Net(nn.Module):
-  def __init__(self):
-      super(Net, self).__init__()
-      self.conv1 = nn.Conv2d(1, 6, 5)
-      self.pool = nn.MaxPool2d(2, 2)
-      self.conv2 = nn.Conv2d(6, 16, 5)
-      self.fc1 = nn.Linear(256, 120)
-      self.fc2 = nn.Linear(120, 84)
-      self.fc3 = nn.Linear(84, 10)
-
-  def forward(self, x):
-      x = self.pool(F.relu(self.conv1(x)))
-      x = self.pool(F.relu(self.conv2(x)))
-      x = x.view(-1, 256)
-      x = F.relu(self.fc1(x))
-      x = F.relu(self.fc2(x))
-      x = self.fc3(x)
-      return x
-```
+This module is ment to be used as a drop-in replacement of ```torch.nn```. Below is an example of a Bayesian neural network implementation.
 ```python
 import torch.nn as nn
 import torch.nn.functional as F
 
 import vinn
 
-class BayesianNet(vinn.Module):
+class Net(vinn.Module): # class Net(nn.Module):
   def __init__(self):
       super(Net, self).__init__()
-      self.conv1 = vinn.Conv2d(1, 6, 5)
+      self.conv1 = vinn.Conv2d(1, 6, 5) # self.conv1 = nn.Conv2d(1, 6, 5)
       self.pool = nn.MaxPool2d(2, 2)
-      self.conv2 = vinn.Conv2d(6, 16, 5)
-      self.fc1 = vinn.Linear(256, 120)
-      self.fc2 = vinn.Linear(120, 84)
-      self.fc3 = vinn.Linear(84, 10)
+      self.conv2 = vinn.Conv2d(6, 16, 5) # self.conv2 = nn.Conv2d(6, 16, 5)
+      self.fc1 = vinn.Linear(256, 120) # self.fc1 = nn.Linear(256, 120)
+      self.fc2 = vinn.Linear(120, 84) # self.fc2 = nn.Linear(120, 84)
+      self.fc3 = vinn.Linear(84, 10) # self.fc3 = nn.Linear(84, 10)
 
   def forward(self, x):
       x = self.pool(F.relu(self.conv1(x)))
@@ -55,6 +32,10 @@ class BayesianNet(vinn.Module):
 ```
 
 ## Training
+Bayesian neural networks implemented using variational inference can be trained by optimizing the Evidence Lower BOund (ELBO):
+<p align="center">
+<img src="https://render.githubusercontent.com/render/math?math=ELBO%20%3D%20%5Cmathbb%7BE%7D_%7Bq(%5Cmathbf%7Bw%7D%3B%20%5Ctheta)%7D%5C%7B%5Cmbox%7Blog%20%7Dp(%5Cmathcal%7BD%7D%7C%5Cmathbf%7Bw%7D)%5C%7D%20-%20KL%5C%7Bq(%5Cmathbf%7Bw%7D%3B%20%5Ctheta)%7C%7Cp(%5Cmathbf%7Bw%7D)%5C%7D" width=500>
+</p>
 
 ## Uncertainty estimation
 
