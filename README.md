@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="https://raw.githubusercontent.com/kumar-shridhar/PyTorch-BayesianCNN/master/experiments/figures/BayesCNNwithdist.png" width=700>
+</p>
+
 # vinn
 A pytorch module to implement Bayesian neural networks with variational inference.
 
