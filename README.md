@@ -3,7 +3,7 @@ A pytorch module to implement Bayesian neural networks with variational inferenc
 
 The standard layer implementation uses <i>Bayes by Backprop</i> \[Blundell et al., 2015\] and the local reparameterization trick \[Kingma, Salimans and Welling, 2015\] to accelerate the forward pass. The KL divergence is computed in closed form if possible, and using the Monte Carlo approximation otherwise.
 
-## Usage
+## Model definition
 This module is ment to be used as a drop-in replacement of ```torch.nn```. Below is an example of a standard neural network architecture and the correspondig Bayesian implementation using ```vinn```.
 ```python
 import torch.nn as nn
@@ -53,6 +53,10 @@ class BayesianNet(vinn.Module):
       x = self.fc3(x)
       return x
 ```
+
+## Training
+
+## Uncertainty estimation
 
 ## References
 
