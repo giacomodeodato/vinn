@@ -3,7 +3,17 @@ A pytorch module to implement Bayesian neural networks with variational inferenc
 
 The standard layer implementation uses <i>Bayes by Backprop</i> \[Blundell et al., 2015\] and the local reparameterization trick \[Kingma, Salimans and Welling, 2015\] to accelerate the forward pass. The KL divergence is computed in closed form if possible, and using the Monte Carlo approximation otherwise.
 
-## Model definition
+## Usage
+
+### Prior and Posterior distributions
+Prior and posterior distribution can be set as arguments in the layer declaration. The module supports distributions from `torch.distributions` that have a loc and scale parameters. The default implementation uses a Normal posterior distribution as well as a Normal prior initialized with `loc=0` and `scale=1`.
+```python
+from torch.distributions import Normal
+
+linear_layer = Linear(4, 5, posterior=Normal, prior=Normal(0, 1))
+```
+
+### Model definition
 This module is ment to be used as a drop-in replacement of ```torch.nn```. Below is an example of a Bayesian neural network implementation.
 ```python
 import torch
@@ -32,10 +42,7 @@ class Net(vinn.Module): # class Net(nn.Module):
         return x
 ```
 
-## Prior and Posterior distributions
-Prior and posterior distribution can be set as arguments in the layer declaration. The module supports distributions from `torch.distributions` that have a loc and scale parameters. The default implementation uses a Normal posterior distribution as well as a Normal prior initialized with `loc=0` and `scale=1`.
-
-## Training
+### Training
 Bayesian neural networks implemented using variational inference can be trained by optimizing the Evidence Lower BOund (ELBO):
 <p align="center">
 <img src="https://render.githubusercontent.com/render/math?math=ELBO%20%3D%20%5Cmathbb%7BE%7D_%7Bq(%5Cmathbf%7Bw%7D%3B%20%5Ctheta)%7D%5C%7B%5Cmbox%7Blog%20%7Dp(%5Cmathcal%7BD%7D%7C%5Cmathbf%7Bw%7D)%5C%7D%20-%20KL%5C%7Bq(%5Cmathbf%7Bw%7D%3B%20%5Ctheta)%7C%7Cp(%5Cmathbf%7Bw%7D)%5C%7D" width=400>
@@ -71,7 +78,10 @@ for epoch in range(n_epochs):
         optimizer.step()
 ```
 
-## Uncertainty estimation
+By default, `vinn` layers have a `kl` attribute as well as models extending `vinn.Module`.
+> :warning: The negative log likelihood function (i.e. `CrossEntropyLoss`) must have `reduction="sum"` in order to follow the correct ELBO loss implementation. Otherwise, `beta` needs to be scaled accordingly.
+
+### Uncertainty estimation
 
 ## References
 
