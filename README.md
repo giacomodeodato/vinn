@@ -94,16 +94,20 @@ Since the parameters of the Bayesian model are sampled at each forward pass, eve
 Where *T* is the number of predictive samples, *t* is the sample index and *i* is the class index. Such uncertainty measure can finally be transformed into a more intuitive confidence score by computing `c = 1 - 2*sqrt(u)` as proposed in \[Deodato et al., 2020\].
 ```python
 def confidence_score(p):
+    """
+    p: np.array of shape (n_predictive_samples, n_data_samples, n_classes)
+    """
+    
     # compute sample mean
     p_mean = np.mean(p, axis=0)
     
     # compute uncertainty estimate
     aleatoric = np.mean(p - np.square(p), axis=0)
-    epistemic = np.mean(np.square(p - np.tile(p_mean, (len(p), 1))), axis=0)
+    epistemic = np.mean(np.square(p - p_mean), axis=0)
     u = aleatoric + epistemic
     
     # select uncertainty corresponding to the predicted class
-    u = u[np.argmax(p_mean)]
+    u = u[np.arange(len(p_mean)), np.argmax(p_mean, axis=1)]
     
     # return confidence score
     return 1 - 2 * np.sqrt(u)
